@@ -213,17 +213,18 @@ struct QueuedBlock {
 };
 
 /**
- * Data structure for an individual peer. This struct is not protected by
- * cs_main since it does not contain validation-critical data.
+ * 개별 피어를 나타내는 데이터 구조체. 이 구조체는 검증에 치명적인 데이터(Validation-critical data)를 
+ * 포함하지 않기 때문에 cs_main으로 보호되지 않는다.
  *
- * Memory is owned by shared pointers and this object is destructed when
- * the refcount drops to zero.
+ * 이 객체의 메모리는 'shared pointer'가 소유하며,
+ * 참조 카운트(refcount)가 0이 되면 객체는 소멸된다.
  *
- * Mutexes inside this struct must not be held when locking m_peer_mutex.
+ * 이 구조체 내부의 뮤텍스들은 'm_peer_mutex'를 잠글때 함께 잡고 있으면 안 된다.
  *
- * TODO: move most members from CNodeState to this structure.
- * TODO: move remaining application-layer data members from CNode to this structure.
+ * TODO: CNodeState의 대부분 멤버를 이 구조체로 옮기기.
+ * TODO: CNode에 남아 있는 애플리케이션 레이어 데이터 멤버도 이 구조체로 옮기기.
  */
+`
 struct Peer {
     /** Same id as the CNode object for this peer */
     const NodeId m_id{0};
