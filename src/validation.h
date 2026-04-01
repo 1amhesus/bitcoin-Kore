@@ -747,27 +747,26 @@ public:
     //! Prune blockfiles from the disk if necessary and then flush chainstate changes
     //! if we pruned.
     void PruneAndFlush();
-
+    
     /**
-     * Find the best known block, and make it the tip of the block chain. The
-     * result is either failure or an activated best chain. pblock is either
-     * nullptr or a pointer to a block that is already loaded (to avoid loading
-     * it again from disk).
+     * 가장 “좋다고 알려진(best known)” 블록을 찾아 이를 블록체인의 tip으로 활성화합니다.
+     * 결과는 실패이거나 베스트 체인이 활성화(activated best chain)된 상태입니다.
+     * pblock은 nullptr 이거나 이미 로드되어 있는 블록을 가리키는 포인터입니다
+     * (디스크에서 다시 로드하는 것을 피하기 위함).
      *
-     * ActivateBestChain is split into steps (see ActivateBestChainStep) so that
-     * we avoid holding cs_main for an extended period of time; the length of this
-     * call may be quite long during reindexing or a substantial reorg.
+     * ActivateBestChain은 여러 단계(ActivateBestChainStep 참고)로 나뉘어 있는데
+     * 이는 cs_main을 장시간 잡고 있는 상황을 피하기 위해서입니다. 특히 reindex 중이거나
+     * 큰 규모의 reorg가 발생한 경우, 이 호출은 상당히 오래 걸 수 있습니다.
      *
-     * May not be called with cs_main held. May not be called in a
-     * validationinterface callback.
+     * cs_main을 잡고 있는 상태에서 호출하면 안 됩니다. 또한 validationinterface의
+     * 콜백 내부에서 호출해서도 안 됩니다.
      *
-     * Note that if this is called while a snapshot chainstate is active, and if
-     * it is called on a validated chainstate whose tip has reached the base
-     * block of the snapshot, its execution will take *MINUTES* while it hashes
-     * the UTXO set to verify the assumeutxo value the snapshot was activated
-     * with. `cs_main` will be held during this time.
+     * 참고로, 스냅샷 chainstate가 활성화된 상태에서 이 함수가 호출되고
+     * “검증된(validated) chainstate”의 tip이 스냅샷의 base block에 도달한 시점이라면
+     * 스냅샷 활성화에 사용된 assumeutxo 값이 맞는지 확인하기 위해 UTXO set을 해시하는 동안
+     * 실행에 *수분(MINUTES)* 이 걸릴 수 있습니다. 이 시간 동안에는 `cs_main`이 잡힙니다.
      *
-     * @returns true unless a system error occurred
+     * @returns 시스템 오류가 발생하지 않는 한 true
      */
     bool ActivateBestChain(
         BlockValidationState& state,
