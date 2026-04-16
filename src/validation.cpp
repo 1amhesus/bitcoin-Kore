@@ -4427,6 +4427,18 @@ bool ChainstateManager::AcceptBlock(const std::shared_ptr<const CBlock>& pblock,
     return true;
 }
 
+/**
+ * 외부에서 전달된 새 블록을 validation 파이프라인에 투입하는 핵심 진입점
+ *
+ * 처리 흐름:
+ * 1. CheckBlock()으로 블록 자체의 기본 유효성을 검사
+ * 2. 검사를 통과하면 AcceptBlock()으로 블록을 수용하고 디스크 저장까지 진행
+ * 3. 이후 ActivateBestChain()을 호출해 활성 체인에 반영을 시도
+ * 4. background chainstate가 있으면 그쪽에도 ActivateBestChain()을 수행
+ *
+ * 즉, 이 함수는 "새 블록 검증 → 수용 → 체인 반영" 흐름의 중심 함수
+ */
+
 bool ChainstateManager::ProcessNewBlock(const std::shared_ptr<const CBlock>& block, bool force_processing, bool min_pow_checked, bool* new_block)
 {
     AssertLockNotHeld(cs_main);
@@ -4436,10 +4448,18 @@ bool ChainstateManager::ProcessNewBlock(const std::shared_ptr<const CBlock>& blo
         if (new_block) *new_block = false;
         BlockValidationState state;
 
+	// CheckBlock()은 CBlock::fChecked 때문에 데이터 레이스가 발생할 수 있어 멀티스레드 블록 검증을 지원하지 않음
+        // 따라서 아래의 임계 구역에는 CheckBlock() 호출도 반드시 포함되어야 함
         // CheckBlock() does not support multi-threaded block validation because CBlock::fChecked can cause data race.
         // Therefore, the following critical section must include the CheckBlock() call as well.
         LOCK(cs_main);
 
+        // CheckBlock() 실패시 AcceptBlock()을 건너뛰면 우리는 해당 블록을 invalid로 절대 표시하지 않게 됨
+        // 이는 CheckBlock()을 실패하게 만드는 아직 알려지지 않은 형태의 블록이며  malleability가 존재할 경우 합의 실패를 방어하기 위한 보호적 처리
+        // 예시는 CVE-2012-2459 및 bitcoin-dev 메일링리스트 논의를 참고
+        //
+        // 또한 CheckBlock() 자체는 아주 비싼 연산이 아니므로 명백히 잘못된 블록의 실패 결과를 캐시해서 얻는 anti-DoS 이점도 크지 않다
+	//
         // Skipping AcceptBlock() for CheckBlock() failures means that we will never mark a block as invalid if
         // CheckBlock() fails.  This is protective against consensus failure if there are any unknown forms of block
         // malleability that cause CheckBlock() to fail; see e.g. CVE-2012-2459 and
