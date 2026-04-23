@@ -170,8 +170,8 @@ static constexpr int MIN_CORE_FDS = MIN_LEVELDB_FDS + NUM_FDS_MESSAGE_CAPTURE;
  */
 static const char* BITCOIN_PID_FILENAME = "bitcoind.pid";
 /**
- * True if this process has created a PID file.
- * Used to determine whether we should remove the PID file on shutdown.
+ * 이 프로세스가 pidfile을 '직접' 생성/기록했음을 나타낸다.
+ * true인 경우에만 종료 시 pidfile을 삭제한다(다른 프로세스가 만든 파일 오삭제 방지).
  */
 static bool g_generated_pid{false};
 
