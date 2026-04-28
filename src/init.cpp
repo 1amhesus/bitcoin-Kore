@@ -226,25 +226,24 @@ void InitContext(NodeContext& node)
 
 //////////////////////////////////////////////////////////////////////////////
 //
-// Shutdown
+// 셧다운(Shutdown)
 //
-
 //
-// Thread management and startup/shutdown:
+// 스레드 관리와 시작/종료:
 //
-// The network-processing threads are all part of a thread group
-// created by AppInit() or the Qt main() function.
-//
-// A clean exit happens when the SignalInterrupt object is triggered, which
-// makes the main thread's SignalInterrupt::wait() call return, and join all
-// other ongoing threads in the thread group to the main thread.
-// Shutdown() is then called to clean up database connections, and stop other
-// threads that should only be stopped after the main network-processing
-// threads have exited.
-//
-// Shutdown for Qt is very similar, only it uses a QTimer to detect
-// ShutdownRequested() getting set, and then does the normal Qt
-// shutdown thing.
+// 네트워크 처리(network-processing) 스레드들은 모두 AppInit() 또는 
+// Qt main() 함수가 생성한 하나의 스레드 그룹(thread group)에 속한다.
+// 
+// 정상적인 종료(clean exit)는 SignalInterrupt 객체가 트리거될 때 발생하여 
+// 메인 스레드의 SignalInterrupt::wait() 호출이 반환(return)되게 만들고
+// 스레드 그룹 안에서 계속 실행중인 다른 모든 스레드들을 메인 스레드에 
+// join(합류/대기)시킨다.
+// 그 다음 Shutdown()이 호출되어 데이터베이스 연결을 정리하고 메인 네트워크 
+// 처리 스레드들이 종료된 뒤에만 멈춰야 하는 다른 스레드들을 중지한다.
+// 
+// Qt에서의 종료도 매우 비슷하지만 QTimer를 사용해 ShutdownRequested()가 
+// 설정되는 것을 감지하고 그 다음 일반적인 Qt 종료 절차를 수행한다.
+// 
 //
 
 bool ShutdownRequested(node::NodeContext& node)
