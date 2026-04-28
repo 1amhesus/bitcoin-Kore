@@ -779,6 +779,8 @@ private:
     }
 };
 
+// 코인베이스 출력을 소비하는 트랜잭션을 추적한다.
+// 리오그(reorg) 발생 시 COINBASE_MATURITY 조건이 여전히 충족되는지 확인하기 위해 다시 검사한다.
 bool MemPoolAccept::PreChecks(ATMPArgs& args, Workspace& ws)
 {
     AssertLockHeld(cs_main);
@@ -904,8 +906,8 @@ bool MemPoolAccept::PreChecks(ATMPArgs& args, Workspace& ws)
 
     int64_t nSigOpsCost = GetTransactionSigOpCost(tx, m_view, STANDARD_SCRIPT_VERIFY_FLAGS);
 
-    // Keep track of transactions that spend a coinbase, which we re-scan
-    // during reorgs to ensure COINBASE_MATURITY is still met.
+    // 코인베이스 출력을 소비하는 트랜잭션을 추적한다.
+    // 리오그(reorg) 발생 시 COINBASE_MATURITY 조건이 여전히 충족되는지 확인하기 위해 다시 검사한다.
     bool fSpendsCoinbase = false;
     for (const CTxIn &txin : tx.vin) {
         const Coin &coin = m_view.AccessCoin(txin.prevout);

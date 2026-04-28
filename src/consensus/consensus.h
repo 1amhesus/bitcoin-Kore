@@ -15,7 +15,7 @@ static const unsigned int MAX_BLOCK_SERIALIZED_SIZE = 4000000;
 static const unsigned int MAX_BLOCK_WEIGHT = 4000000;
 /** The maximum allowed number of signature check operations in a block (network rule) */
 static const int64_t MAX_BLOCK_SIGOPS_COST = 80000;
-/** Coinbase transaction outputs can only be spent after this number of new blocks (network rule) */
+/** 코인베이스 트랜잭션 출력은 이 수만큼의 새 블록이 지난 뒤에만 소비될 수 있다(네트워크 규칙). */
 static const int COINBASE_MATURITY = 100;
 
 static const int WITNESS_SCALE_FACTOR = 4;
