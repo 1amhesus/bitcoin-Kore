@@ -34,14 +34,17 @@
 # BIP102: Block Size Increase to 2MB 구현 분석
 
 이 문서는 Jeff Garzik이 작성한 BIP102와 그 구현 커밋을 바탕으로
-블록 크기 제한과 sigops limit이 코드상에서 어떻게 다뤄졌는지 정리한다.
+
+블록크기 제한과 sigops limit이 코드상에서 어떻게 다뤄졌는지 정리한다.
+
 
 ## 1. BIP102 문서의 핵심
 
 BIP102의 문서상 핵심은 블록에 허용되는 트랜잭션 데이터의 총량을
+
 1MB에서 2MB로 단순히 한 번 증가시키는 것이다.
 
-BIP102의 Specification은 다음 세 가지를 제안한다.
+BIP102의 Specification은 다음 세 가지 제안으로 요약 할 수 있다.
 
 1. trigger point에서 `MAX_BLOCK_SIZE`를 `2,000,000 bytes`로 증가
 2. maximum block sigops도 비슷한 비율로 증가시키되 `SIZE / 50` 공식 보존
@@ -49,11 +52,12 @@ BIP102의 Specification은 다음 세 가지를 제안한다.
 
 즉 문서상 BIP102는 “점진적 증가”보다는 1MB에서 2MB로의 단순한 hard fork 제안에 가깝다.
 
+
 ## 2. 구현 커밋 개요
 
-Jeff Garzik의 BIP102 구현 커밋에서는 문서 설명보다 조금 더 동적인 구조가 있는데,
-기존의 `MAX_BLOCK_SIZE = 1000000` 고정 상수는 제거되고 `MaxBlockSize(uint64_t nTime)` 
-함수가 추가된다.
+Jeff Garzik의 BIP102 구현 커밋에서는 문서 설명보다 조금 더 동적인 구조가 있는데
+
+기존의 `MAX_BLOCK_SIZE = 1000000` 고정 상수는 제거되고 `MaxBlockSize(uint64_t nTime)` 함수가 추가된다.
 
 핵심 코드는 다음과 같다.
 
@@ -71,31 +75,14 @@ inline unsigned int MaxBlockSize(uint64_t nTime) {
     return (2*1000*1000) + (20 * ((nTime - BIP102_FORK_TIME) / 600));
 }
 ```
-이 함수는 fork time 이전에는 1MB를 반환하고 fork time 이후에는 2MB에 
-시간 경과에 따른 증가분을 더한 값을 반환한다.
+이 함수는 fork time 이전에는 1MB를 반환하고 fork time 이후에는 2MB에 시간 경과에 따른 
 
-따라서 BIP102 문서 자체는 2MB로의 단순 1회 증가 제안이지만이 구현 커밋에서는 
+증가분을 더한 값을 반환한다.
+
+따라서 BIP102 문서 자체는 2MB로의 단순 1회 증가 제안이지만이 구현 커밋에서는
+ 
 시간에 따라 점진적으로 블록 크기 상한이 증가하는 구조가 포함되어 있다.
 
-## 3. 코드 변경 위치
-
-### 3.1 src/consensus/consensus.h
-
-가장 중요한 변경은 src/consensus/consensus.h에 있는데,
-기존에는 블록 크기 hard limit이 다음과 같은 고정 상수로 정의되어 있었다.
-
-```cpp
-static const unsigned int MAX_BLOCK_SIZE = 1000000;
-```
-BIP102 구현 커밋에서는 이 상수가 제거되고 `MaxBlockSize(uint64_t nTime)`함수로 대체된다.
-
-
-
-이 함수는 fork time 이전에는 1MB를 반환하고, fork time 이후에는 2MB에 
-시간 경과에 따른 증가분을 더한 값을 반환한다.
-
-따라서 BIP102 문서 자체는 2MB로의 단순 1회 증가 제안이지만 이 구현 커밋에서는 
-시간에 따라 점진적으로 블록 크기 상한이 증가하는 구조가 포함되어 있다.
 
 ## 3. 코드 변경 위치
 
@@ -125,7 +112,7 @@ inline unsigned int MaxBlockSigops(uint64_t nTime) {
 }
 ```
 
-즉 블록 내 서명검증 연산 수 제한인 sigops limit도 블록 크기 제한 함수값에 연동되도록 설계된다.
+즉 블록 내 서명검증 연산수 제한인 sigops limit도 블록크기 제한 함수값에 연동되도록 설계된 것이다.
 
 ### 3.2 `src/main.cpp` - `CheckTransaction()`
 

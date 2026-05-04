@@ -9,7 +9,9 @@
 #include <cstdint>
 #include <cstdlib>
 
-/** The maximum allowed size for a serialized block, in bytes (only for buffer size limits) */
+/** 직렬화된 블록의 최대 허용 크기(바이트 단위).
+ *  합의 규칙 한도(Consensus rule limit)가 아니라, 입력/버퍼 크기 제한(Buffer size limit, DoS 방지 목적)을 위한 상한이다.
+ */
 static const unsigned int MAX_BLOCK_SERIALIZED_SIZE = 4000000;
 /** The maximum allowed weight for a block, see BIP 141 (network rule) */
 static const unsigned int MAX_BLOCK_WEIGHT = 4000000;
