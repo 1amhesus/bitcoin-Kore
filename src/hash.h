@@ -96,7 +96,12 @@ inline uint160 Hash160(const T1& in1)
     return result;
 }
 
-/** A writer stream (for serialization) that computes a 256-bit hash. */
+// Kore note:
+// HashWriter는 writer-like interface를 제공하지만 실제 목적지는 파일이나 vector가 아니라 SHA256 context다. 
+// 따라서 CBlockHeader, CTransaction 같은 객체의 기존 Serialize() 정의를 그대로 사용하면서 
+// 그 consensus byte layout을 해시 계산 입력으로 직접 전달할 수 있다.
+
+/** serialization 과정에서 256-bit hash를 계산하는 writer stream. */
 class HashWriter
 {
 private:
@@ -108,9 +113,9 @@ public:
         ctx.Write(UCharCast(src.data()), src.size());
     }
 
-    /** Compute the double-SHA256 hash of all data written to this object.
+    /** 이 객체에 쓰여진 모든 데이터의 double-SHA256 hash를 계산한다.
      *
-     * Invalidates this object.
+     * 이 객체는 무효화된다.
      */
     uint256 GetHash() {
         uint256 result;
@@ -119,9 +124,9 @@ public:
         return result;
     }
 
-    /** Compute the SHA256 hash of all data written to this object.
+    /** 이 객체에 쓰여진 모든 데이터의 SHA256 hash를 계산한다.
      *
-     * Invalidates this object.
+     * 이 객체는 무효화된다.
      */
     uint256 GetSHA256() {
         uint256 result;
@@ -130,7 +135,7 @@ public:
     }
 
     /**
-     * Returns the first 64 bits from the resulting hash.
+     * 결과 hash의 앞 64 bits를 반환한다.
      */
     inline uint64_t GetCheapHash() {
         uint256 result = GetHash();
