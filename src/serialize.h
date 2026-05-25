@@ -632,18 +632,20 @@ struct LimitedStringFormatter
     }
 };
 
-/** Formatter to serialize/deserialize vector elements using another formatter
+/**
+ * 다른 formatter를 사용해 vector 원소들을 serialize/deserialize하는 formatter.
  *
- * Example:
+ * 예시:
  *   struct X {
- *     std::vector<uint64_t> v;
- *     SERIALIZE_METHODS(X, obj) { READWRITE(Using<VectorFormatter<VarInt>>(obj.v)); }
+ *       std::vector<uint64_t> v;
+ *       SERIALIZE_METHODS(X, obj) { READWRITE(Using<VectorFormatter<VarInt>>(obj.v)); }
  *   };
- * will define a struct that contains a vector of uint64_t, which is serialized
- * as a vector of VarInt-encoded integers.
  *
- * V is not required to be an std::vector type. It works for any class that
- * exposes a value_type, size, reserve, emplace_back, back, and const iterators.
+ * 위 코드는 uint64_t vector를 포함하는 struct를 정의하며
+ * 이 vector는 VarInt로 인코딩된 정수들의 vector로 직렬화된다.
+ *
+ * V는 반드시 std::vector 타입일 필요는 없다. value_type, size, reserve,
+ * emplace_back, back, const iterator를 제공하는 모든 class에서 동작한다.
  */
 template<class Formatter>
 struct VectorFormatter
