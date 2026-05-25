@@ -16,13 +16,14 @@
 #include <utility>
 #include <vector>
 
-/** Nodes collect new transactions into a block, hash them into a hash tree,
- * and scan through nonce values to make the block's hash satisfy proof-of-work
- * requirements.  When they solve the proof-of-work, they broadcast the block
- * to everyone and the block is added to the block chain.  The first transaction
- * in the block is a special one that creates a new coin owned by the creator
- * of the block.
+/**
+ * 노드는 새로운 트랜잭션들을 모아서 하나의 블록에 넣고 그것들을 해시 트리로 해싱한 뒤에
+ * 블록의 해시가 작업증명(proof-of-work) 요구 조건을 만족하도록 논스(nonce)값을 스캔한다.
+ * 작업증명을 풀면 노드는 그 블록을 모두에게 브로드캐스트하고 해당 블록은 블록체인에 추가된다.
+ * 블록 안의 첫 번째 트랜잭션은 특별한 트랜잭션으로 블록 생성자가 소유하는 새로운 코인을 만들어낸다.
  */
+
+
 class CBlockHeader
 {
 public:
@@ -39,6 +40,13 @@ public:
         SetNull();
     }
 
+    // Kore note:
+    // 이 직렬화(serialization) 메서드 정의는 CBlockHeader의 합의 바이트 표현에서 네트워크 메시지 인코딩, 디스크 직렬화, 메모리 버퍼, 
+    // HashWriter를 통한 해싱 문맥에서 재사용된다. 즉, block header의 consensus byte layout은 여기서 한 번만 정의된다.
+    //
+    // 여기서 CBlockHeader는 필드들의 직렬화 순서와 형식만 정의하고 실제 바이트의 목적지/출처는 Serialize()/Unserialize()에 전달된
+    // stream-like 객체가 맡는다. 예를 들어 VectorWriter는 메모리 vector에 쓰고 SpanReader는 byte span에서 읽으며, 
+    // HashWriter는 같은 바이트를 해시 엔진에 전달한다.
     SERIALIZE_METHODS(CBlockHeader, obj) { READWRITE(obj.nVersion, obj.hashPrevBlock, obj.hashMerkleRoot, obj.nTime, obj.nBits, obj.nNonce); }
 
     void SetNull()
